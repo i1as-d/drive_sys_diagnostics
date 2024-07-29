@@ -3,17 +3,28 @@ import numpy as np
 import matplotlib.pyplot as plt
 from io import StringIO
 import time
-import re
+import re, sys
 
 # Global variable for the file path
 # FILE_PATH = "/home/deniz-a/Desktop/drive_sys_diagnostics/data/foxy_full_loop_no_cam_/foxy_full_loop_no_cam_resources.csv"
 # GPU_FILE_PATH = "/home/deniz-a/Desktop/drive_sys_diagnostics/data/foxy_full_loop_no_cam_/foxy_full_loop_no_cam_gpu.txt"
 # DRIVE_DELAY_FILE_PATH = "/home/deniz-a/Desktop/drive_sys_diagnostics/data/foxy_full_loop_no_cam_/foxy_sensor_2_frenet_delay.txt"
 # old_smi = True
+old_smi = False
 
-FILE_PATH = "/home/deniz-a/Desktop/drive_sys_diagnostics/data/humble_full_loop_no_cam_/humble_full_loop_no_cam_resources.csv"
-GPU_FILE_PATH = "/home/deniz-a/Desktop/drive_sys_diagnostics/data/humble_full_loop_no_cam_/humble_full_loop_no_cam_gpu.txt"
-DRIVE_DELAY_FILE_PATH = "/home/deniz-a/Desktop/drive_sys_diagnostics/data/humble_full_loop_no_cam_/humble_sensor_2_frenet_delay.txt"
+# FILE_PATH = "/home/deniz-a/Desktop/drive_sys_diagnostics/data/humble_full_loop_no_cam_/humble_full_loop_no_cam_resources.csv"
+#FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_fastrtps.csv"
+#FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_fastrtps_reference_default.csv"
+#FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_fastrtps_reference_default_3.csv"
+
+#FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_cyclonedds_multicast_true.csv"
+#FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_fastrtps_lifecycle_part.csv"
+#FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_fastrtps_QOS_default.csv"
+# FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_fastrtps_better_qos.csv"
+FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_cyclonedds_higher_netset.csv"
+#
+GPU_FILE_PATH = "/home/mai/drive_sys_diagnostics/data/humble_full_loop_no_cam_/humble_full_loop_no_cam_gpu.txt"
+DRIVE_DELAY_FILE_PATH = "/home/mai/drive_sys_diagnostics/data/humble_full_loop_no_cam_/humble_sensor_2_frenet_delay.txt"
 
 # FILE_PATH = "/home/deniz-a/Desktop/drive_sys_diagnostics/data/humble_monitoring_full_loop/humble_full_loop_bf_resources.csv"
 
@@ -261,12 +272,12 @@ def plot_cpu_data(timestamps, column_titles, tensor):
     axes[1].legend()
 
     # Adding a vertical line at the tenth timestamp on both graphs
-    launch_timestamp_index = 55
-    goal_pose_timestamp_index = 95
-    axes[0].axvline(x=launch_timestamp_index, color='k', linestyle='--')
-    axes[1].axvline(x=launch_timestamp_index, color='k', linestyle='--')
-    axes[0].axvline(x=goal_pose_timestamp_index, color='k', linestyle='--')
-    axes[1].axvline(x=goal_pose_timestamp_index, color='k', linestyle='--')
+    # launch_timestamp_index = 55
+    # goal_pose_timestamp_index = 95
+    # axes[0].axvline(x=launch_timestamp_index, color='k', linestyle='--')
+    # axes[1].axvline(x=launch_timestamp_index, color='k', linestyle='--')
+    # axes[0].axvline(x=goal_pose_timestamp_index, color='k', linestyle='--')
+    # axes[1].axvline(x=goal_pose_timestamp_index, color='k', linestyle='--')
     
 
     plt.tight_layout()
@@ -419,13 +430,18 @@ def plot_delay_data(file_path):
     return delay_data
 
 if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python plot_atopsar_csv_results.py <csv_file_path>")
+        sys.exit(1)
+
+    FILE_PATH = sys.argv[1]
 
     # ========== delay report ==========
-    plot_delay_data(DRIVE_DELAY_FILE_PATH)
+    # plot_delay_data(DRIVE_DELAY_FILE_PATH)
 
     # ========== gpu report ==========
-    gpu_data = parse_gpu_file(GPU_FILE_PATH)
-    plot_gpu_data(gpu_data, old_smi)
+    # gpu_data = parse_gpu_file(GPU_FILE_PATH)
+    # plot_gpu_data(gpu_data, old_smi)
 
 
     # ========== atop report ========== 
