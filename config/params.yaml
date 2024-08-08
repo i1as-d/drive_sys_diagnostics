@@ -1,0 +1,7 @@
+settings:
+  old_smi: false
+
+paths:
+  file_path: "/home/deniz-a/Desktop/drive_sys_diagnostics/data/humble_full_loop_no_cam_/humble_full_loop_no_cam_resources.csv"
+  gpu_file_path: "/home/deniz-a/Desktop/drive_sys_diagnostics/data/humble_full_loop_no_cam_/humble_full_loop_no_cam_gpu.txt"
+  drive_delay_file_path: "/home/deniz-a/Desktop/drive_sys_diagnostics/data/humble_full_loop_no_cam_/humble_sensor_2_frenet_delay.txt"

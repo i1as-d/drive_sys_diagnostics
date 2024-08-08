@@ -2,32 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from io import StringIO
-import time
-import re, sys
-
-# Global variable for the file path
-# FILE_PATH = "/home/deniz-a/Desktop/drive_sys_diagnostics/data/foxy_full_loop_no_cam_/foxy_full_loop_no_cam_resources.csv"
-# GPU_FILE_PATH = "/home/deniz-a/Desktop/drive_sys_diagnostics/data/foxy_full_loop_no_cam_/foxy_full_loop_no_cam_gpu.txt"
-# DRIVE_DELAY_FILE_PATH = "/home/deniz-a/Desktop/drive_sys_diagnostics/data/foxy_full_loop_no_cam_/foxy_sensor_2_frenet_delay.txt"
-# old_smi = True
-old_smi = False
-
-# FILE_PATH = "/home/deniz-a/Desktop/drive_sys_diagnostics/data/humble_full_loop_no_cam_/humble_full_loop_no_cam_resources.csv"
-#FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_fastrtps.csv"
-#FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_fastrtps_reference_default.csv"
-#FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_fastrtps_reference_default_3.csv"
-
-#FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_cyclonedds_multicast_true.csv"
-#FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_fastrtps_lifecycle_part.csv"
-#FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_fastrtps_QOS_default.csv"
-# FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_fastrtps_better_qos.csv"
-FILE_PATH = "/home/mai/drive_sys_diagnostics/data/recording_cyclonedds_higher_netset.csv"
-#
-GPU_FILE_PATH = "/home/mai/drive_sys_diagnostics/data/humble_full_loop_no_cam_/humble_full_loop_no_cam_gpu.txt"
-DRIVE_DELAY_FILE_PATH = "/home/mai/drive_sys_diagnostics/data/humble_full_loop_no_cam_/humble_sensor_2_frenet_delay.txt"
-
-# FILE_PATH = "/home/deniz-a/Desktop/drive_sys_diagnostics/data/humble_monitoring_full_loop/humble_full_loop_bf_resources.csv"
-
+import time, os
+import re, yaml
 
 def read_atop_csv(file_path):
     """Fetch data from csv file to python object
@@ -106,7 +82,7 @@ def plot_gpu_data(gpu_data, old_smi):
     # ax1.plot(timestamps, dec, label='dec (%)')
     # ax1.plot(timestamps, jpg, label='jpg (%)')
     # ax1.plot(timestamps, ofa, label='ofa (%)')
-    ax1.set_ylabel('Temp, Pow, loads (legend)')
+    ax1.set_ylabel('Temp (°C), Pow (W), loads (%)')
     ax1.set_title('Temp, Power, GPU, memory')
     ax1.legend()
     ax1.grid(True, linestyle='--', alpha=0.5)
@@ -272,12 +248,12 @@ def plot_cpu_data(timestamps, column_titles, tensor):
     axes[1].legend()
 
     # Adding a vertical line at the tenth timestamp on both graphs
-    # launch_timestamp_index = 55
-    # goal_pose_timestamp_index = 95
-    # axes[0].axvline(x=launch_timestamp_index, color='k', linestyle='--')
-    # axes[1].axvline(x=launch_timestamp_index, color='k', linestyle='--')
-    # axes[0].axvline(x=goal_pose_timestamp_index, color='k', linestyle='--')
-    # axes[1].axvline(x=goal_pose_timestamp_index, color='k', linestyle='--')
+    launch_timestamp_index = 55
+    goal_pose_timestamp_index = 95
+    axes[0].axvline(x=launch_timestamp_index, color='k', linestyle='--')
+    axes[1].axvline(x=launch_timestamp_index, color='k', linestyle='--')
+    axes[0].axvline(x=goal_pose_timestamp_index, color='k', linestyle='--')
+    axes[1].axvline(x=goal_pose_timestamp_index, color='k', linestyle='--')
     
 
     plt.tight_layout()
@@ -404,8 +380,8 @@ def plot_delay_data(file_path):
     # Plot histogram of encountered y values
     n, bins, patches = ax2.hist(delay_data, bins=20, edgecolor='black')
     ax2.grid(True, linestyle='--', alpha=0.5)
-    ax2.set_xlabel('Delay Value')
-    ax2.set_ylabel('Frequency')
+    ax2.set_xlabel('Delay Value (sec)')
+    ax2.set_ylabel('Number of executions')
     ax2.set_title('Distribution of Delay Values')
 
     # Calculate mean and variance
@@ -414,7 +390,7 @@ def plot_delay_data(file_path):
 
     # Add vertical lines for mean and variance
     ax2.axvline(x=mean_delay, color='red', linestyle='--', label=f'Mean: {mean_delay:.2f}')
-    ax2.axvline(x=mean_delay - np.sqrt(variance_delay), color='blue', linestyle='--', label=f'Std Dev: {np.sqrt(variance_delay):.2f}')
+    ax2.axvline(x=mean_delay - np.sqrt(variance_delay), color='blue', linestyle='--', label=f'Spread: {np.sqrt(variance_delay):.2f}')
     ax2.axvline(x=mean_delay + np.sqrt(variance_delay), color='blue', linestyle='--')
 
     # Add legend
@@ -430,18 +406,25 @@ def plot_delay_data(file_path):
     return delay_data
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python plot_atopsar_csv_results.py <csv_file_path>")
-        sys.exit(1)
 
-    FILE_PATH = sys.argv[1]
+    # Construct the path to params.yaml & Load the YAML file
+    config_path = os.path.join(os.path.dirname(__file__), '../config/params.yaml')
+    with open(config_path, "r") as file:
+        config = yaml.safe_load(file)
+
+    # Fetch values from the YAML file
+    old_smi = config['settings']['old_smi']
+    FILE_PATH = config['paths']['file_path']
+    GPU_FILE_PATH = config['paths']['gpu_file_path']
+    DRIVE_DELAY_FILE_PATH = config['paths']['drive_delay_file_path']
+
 
     # ========== delay report ==========
-    # plot_delay_data(DRIVE_DELAY_FILE_PATH)
+    plot_delay_data(DRIVE_DELAY_FILE_PATH)
 
     # ========== gpu report ==========
-    # gpu_data = parse_gpu_file(GPU_FILE_PATH)
-    # plot_gpu_data(gpu_data, old_smi)
+    gpu_data = parse_gpu_file(GPU_FILE_PATH)
+    plot_gpu_data(gpu_data, old_smi)
 
 
     # ========== atop report ========== 
@@ -449,13 +432,13 @@ if __name__ == "__main__":
     data_blocks = read_atop_csv(FILE_PATH)
     print("Blocks analyzed (excl. header block) : ", len(data_blocks) - 1)
 
-    # data_blocks[:][0] # HEADER
-    # data_blocks[:][1] # cpu perfs
-    # data_blocks[:][2] # avrg workload
-    # data_blocks[:][3] # thread related metrics
-    # data_blocks[:][4] # memory
-    # data_blocks[:][5] # disk I/O activity
-    # data_blocks[:][6] # network activity
+    data_blocks[:][0] # HEADER
+    data_blocks[:][1] # cpu perfs
+    data_blocks[:][2] # avrg workload
+    data_blocks[:][3] # thread related metrics
+    data_blocks[:][4] # memory
+    data_blocks[:][5] # disk I/O activity
+    data_blocks[:][6] # network activity
 
     # ----- 1 : CPU perfs
     timestamps, column_titles, tensor = parse_nested_data_block(data_blocks[1])
